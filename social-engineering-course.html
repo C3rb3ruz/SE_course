@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Social Engineering: Beginner to Practitioner</title>
+<style>
+:root{--bg:#10141a;--bg2:#161b23;--ln:#273040;--tx:#e8e6e0;--dim:#8d97a8;--ac:#d8a650;--ac2:#8f6f33;--ok:#62bd84;--bad:#e17a68;
+--serif:Georgia,"Iowan Old Style","Palatino Linotype",serif;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+a{color:var(--ac)}
+.warn{background:#3a2a14;color:#f1d9a8;padding:8px 20px;font-size:13px;text-align:center}
+.top{position:sticky;top:0;z-index:10;background:rgba(16,20,26,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--ln)}
+.top-in{padding:12px 24px}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.brand{font:600 18px var(--serif);letter-spacing:.2px}
+.brand small{font:13px var(--sans);color:var(--dim);margin-left:10px}
+.stats{font-size:13px;color:var(--dim)}.stats b{color:var(--ac)}
+.bar{height:5px;background:var(--bg2);border:1px solid var(--ln);border-radius:3px;margin:10px 0 8px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ac2),var(--ac));transition:width .4s}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.tools button{background:none;border:1px solid var(--ln);border-radius:4px;color:var(--dim);padding:4px 10px;font-size:12.5px;cursor:pointer}
+.tools button:hover{color:var(--tx);border-color:var(--ac2)}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr)}
+@media(max-width:840px){.layout{grid-template-columns:1fr}.rail{position:static!important;height:auto!important;order:2;border-right:0!important;border-top:1px solid var(--ln)}#view{padding:22px 16px 60px!important}}
+/* route rail: the course is a sequence, so the nav draws it as one */
+.rail{position:sticky;top:var(--th,104px);align-self:start;height:calc(100vh - var(--th,104px));overflow:auto;padding:20px 14px 40px 18px;background:#0c1015;border-right:1px solid var(--ln)}
+.ph{margin:16px 0 4px;font:600 13px var(--serif);color:var(--tx);display:flex;justify-content:space-between;gap:8px}
+.ph:first-child{margin-top:0}.ph span{font:12px var(--sans);color:var(--dim)}
+.nodes{margin:0 0 0 7px;padding:0 0 0 0;border-left:2px solid var(--ln);list-style:none}
+.node{position:relative;display:block;width:100%;text-align:left;background:none;border:0;border-radius:0 5px 5px 0;padding:6px 8px 6px 20px;color:var(--dim);cursor:pointer;font-size:13px;line-height:1.35}
+.node:hover{color:var(--tx);background:var(--bg2)}
+.node:before{content:"";position:absolute;left:-7px;top:11px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--ln)}
+.node.part:before{border-color:var(--ac2);background:linear-gradient(90deg,var(--ac2) 50%,var(--bg) 50%)}
+.node.done:before{background:var(--ok);border-color:var(--ok)}
+.node.cur{color:var(--tx);background:var(--bg2)}.node.cur:before{border-color:var(--ac);box-shadow:0 0 0 3px rgba(216,166,80,.2)}
+.node b{font-weight:500;color:var(--dim);margin-right:6px;font-size:12px}
+/* step */
+.chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--dim)}
+.chip{border:1px solid var(--ln);border-radius:3px;padding:1px 8px}
+.chip.ok{color:var(--ok);border-color:var(--ok)}
+h1{font:600 30px/1.2 var(--serif);margin:14px 0 8px}
+.goal{color:var(--dim);margin:0;max-width:62ch;font-family:var(--serif);font-size:16.5px;line-height:1.65}
+.sec{border-top:1px solid var(--ln);margin-top:30px;padding-top:20px}
+.sec h2{font:600 19px var(--serif);margin:0 0 4px}
+.sec .sub{color:var(--dim);font-size:13.5px;margin:0 0 14px}
+.res{list-style:none;margin:0;padding:0}
+.res li{display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg2)}
+.ck{width:18px;height:18px;flex:none;border:1.5px solid var(--ln);border-radius:4px;background:none;color:var(--ok);font-size:12px;line-height:1;cursor:pointer}
+.ck.on{border-color:var(--ok);background:rgba(98,189,132,.12)}
+.res a{color:var(--tx);text-decoration:none;flex:1}.res a:hover{color:var(--ac)}
+.tag{font-size:11.5px;color:var(--dim);border:1px solid var(--ln);border-radius:3px;padding:0 6px}
+.q{margin:0 0 22px}.q p{margin:0 0 8px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border:1px solid var(--ln);border-radius:5px;margin-bottom:6px;cursor:pointer;background:var(--bg2)}
+.opt:hover{border-color:var(--ac2)}.opt input{margin-top:5px}
+.opt.good{border-color:var(--ok);background:rgba(98,189,132,.1)}.opt.bad{border-color:var(--bad);background:rgba(225,122,104,.1)}
+.why{font-size:13.5px;color:var(--dim);border-left:2px solid var(--ok);padding-left:12px;margin:8px 0 0}
+.btn{background:var(--ac);color:#1b1407;border:0;border-radius:5px;padding:9px 18px;font-weight:600;cursor:pointer}
+.btn:hover{background:#e6b865}.btn:disabled{background:var(--bg2);color:var(--dim);cursor:not-allowed}
+.btn.ghost{background:none;color:var(--tx);border:1px solid var(--ln)}.btn.ghost:hover{border-color:var(--ac2)}
+.fb{margin-left:12px;font-size:13.5px}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
+textarea{width:100%;min-height:150px;background:var(--bg2);border:1px solid var(--ln);border-radius:5px;padding:12px;resize:vertical;line-height:1.55}
+.cl{display:block;margin:6px 0;font-size:14px;cursor:pointer}.cl input{margin-right:8px}
+.wc{font-size:12.5px;color:var(--dim);margin:6px 0 10px}
+.lock{color:var(--dim);font-style:italic}
+.nav{display:flex;justify-content:space-between;margin-top:34px;gap:10px}
+.overlay{position:fixed;inset:0;background:rgba(8,10,14,.85);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--ac2);border-radius:8px;max-width:460px;padding:30px;text-align:center}
+.modal h2{font:600 26px var(--serif);margin:0 0 10px}
+#view{padding:32px 44px 90px;max-width:960px;width:100%;margin:0 auto}
+.lesson h3{font:600 17px var(--serif);margin:20px 0 6px}
+.lesson p{max-width:66ch;font:16.5px/1.7 var(--serif);margin:0 0 10px}
+.key{border-left:3px solid var(--ac);background:var(--bg2);padding:12px 18px;margin-top:20px;border-radius:0 5px 5px 0;max-width:66ch}
+.key ul{margin:6px 0 0;padding-left:18px}.key li{margin:3px 0}
+.vids{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+.vf{position:relative;aspect-ratio:16/9;background:#06080b;border:1px solid var(--ln);border-radius:5px;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.vf button{width:58px;height:58px;border-radius:50%;border:2px solid var(--ac);background:rgba(216,166,80,.12);color:var(--ac);font-size:20px;cursor:pointer}
+.vf:hover button{background:var(--ac);color:#1b1407}
+.vf iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vm{display:flex;gap:10px;align-items:center;margin-top:8px;font-size:13.5px}.vm span{flex:1}.vm a{font-size:12.5px}
+.act{border:1px solid var(--ln);border-radius:6px;padding:16px 18px;margin-bottom:16px;background:var(--bg2)}
+.act h3{font:600 16px var(--serif);margin:0 0 4px;display:flex;gap:10px;align-items:center}
+.act .sub{margin:0 0 6px}
+.msg{white-space:pre-wrap;background:#0c1015;border:1px solid var(--ln);border-radius:5px;padding:14px;margin:10px 0;font:14px/1.8 var(--sans)}
+.hot{border-bottom:1px dotted var(--dim);cursor:pointer}.hot:hover{background:rgba(216,166,80,.15)}
+.hot.on{background:rgba(216,166,80,.3);border-bottom:1px solid var(--ac)}
+.hot.good{background:rgba(98,189,132,.25);cursor:default}.hot.miss{background:rgba(216,166,80,.22);border-bottom:2px solid var(--ac);cursor:default}.hot.bad{background:rgba(225,122,104,.25);cursor:default}
+.it{margin:14px 0 0}.it p{margin:0 0 6px}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{background:none;border:1px solid var(--ln);border-radius:4px;padding:5px 12px;font-size:13.5px;cursor:pointer;text-align:left}
+.pill:hover:not(:disabled){border-color:var(--ac2)}.pill:disabled:not(.good){opacity:.45;cursor:default}
+.pill.good{border-color:var(--ok);background:rgba(98,189,132,.14)}.pill.bad{border-color:var(--bad);background:rgba(225,122,104,.14)}
+.why.bad{border-left-color:var(--bad)}
+.tool{display:block;width:100%;text-align:left;background:none;border:1px solid var(--ln);border-radius:5px;padding:7px 10px;margin-bottom:8px;color:var(--tx);cursor:pointer;font-size:13px}.tool:hover,.tool.cur{border-color:var(--ac)}
+.gtools{display:flex;gap:10px;margin-bottom:14px}.gtools input{flex:1;background:var(--bg2);border:1px solid var(--ln);border-radius:5px;padding:9px 12px}
+.fcard{min-height:220px;border:1px solid var(--ln);background:var(--bg2);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;cursor:pointer;font:600 22px/1.4 var(--serif)}.fcard small{font:13px var(--sans);color:var(--dim)}
+.gl dt{font:600 16px var(--serif);margin-top:16px}.gl dd{margin:3px 0 0;color:var(--dim);max-width:66ch}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div id="warn" class="warn" hidden>Your browser blocked local storage, so progress won’t persist between visits. Use Export to save it as a file.</div>
+<header class="top"><div class="top-in">
+  <div class="row"><div class="brand">Social Engineering<small>Beginner to practitioner. Ethics first.</small></div>
+  <div class="stats"><b id="pct">0%</b> overall · <b id="cnt">0</b> modules complete · about <b id="left">0 h</b> left</div></div>
+  <div class="bar"><i id="fill"></i></div>
+  <div class="tools"><button id="exp">Export progress</button><button id="imp">Import progress</button><button id="rst">Reset course</button><input id="file" type="file" accept=".json,application/json" hidden></div>
+</div></header>
+<main class="layout"><nav id="rail" class="rail" aria-label="Course modules"></nav><section id="view"></section></main>
+<div id="overlay" class="overlay"><div class="modal"><h2>Course complete</h2>
+<p id="sum" style="color:var(--dim)"></p><p>Keep practicing only where you have permission, and keep your notes: they are your portfolio.</p>
+<button class="btn" id="close">Back to the course</button></div></div>
+
+<script>
+const COURSE = [
+{
+  id:"1", title:"What Is Social Engineering?",
+  goal:"Get the basic idea and vocabulary.",
+  resources:[
+    {label:"Introduction to Social Engineering — GeeksforGeeks", url:"https://www.geeksforgeeks.org/cybersecurity/social-engineering-the-art-of-virtual-exploitation/"},
+    {label:"Video 1", url:"https://youtu.be/PWVN3Rq4gzw"},
+    {label:"Video 2", url:"https://youtu.be/sF0uBtavItI"},
+    {label:"Playlist", url:"https://youtube.com/playlist?list=PLQlOoYKO3GxetujYGSdKoW18OtCcuxvYy"}
+  ],
+  questions:[
+    {q:"What is social engineering mainly about?", opts:["Writing code to exploit software bugs","Manipulating people into giving up information or access","Physically stealing computer hardware","Cracking encrypted files"], correct:1},
+    {q:"Why do attackers often prefer social engineering?", opts:["It requires expensive hacking tools","Firewalls cannot stop any attack","Tricking a person can be easier than breaking into a well-defended system","It is legal in every country"], correct:2},
+    {q:"Which is an example of social engineering?", opts:["A caller pretending to be IT support to get your password","A scheduled software update","A hard drive failing","A router restarting"], correct:0}
+  ]
+},
+{
+  id:"2", title:"Common Attack Types",
+  goal:"Learn the main ways social engineering attacks are carried out.",
+  resources:[
+    {label:"Social Engineering: Definition & 5 Attack Types (Tripwire)", url:"https://www.tripwire.com/state-of-security/5-social-engineering-attacks-to-watch-out-for"},
+    {label:"Video 1", url:"https://youtu.be/akoDmeV3LQo"},
+    {label:"Video 2", url:"https://youtu.be/lczewNvAnZk"},
+    {label:"Video 3", url:"https://youtu.be/GSU1Ue_7Kb0"},
+    {label:"Cisco Networking Academy: Ethical Hacker (module 4)", url:"https://www.netacad.com/courses/ethical-hacker"}
+  ],
+  questions:[
+    {q:"An email pretends to be from your bank and urges you to click a link. What is this?", opts:["Vishing","Phishing","Tailgating","Smishing"], correct:1},
+    {q:"Vishing is carried out over:", opts:["Text message","USB drives","Phone calls","Wi-Fi"], correct:2},
+    {q:"Smishing is delivered by:", opts:["Text message","Postal mail","Voice call","Fax"], correct:0}
+  ]
+},
+{
+  id:"3", title:"Why It Works: The Psychology of Influence",
+  goal:"Understand why people say yes, which is the core of the whole field.",
+  resources:[
+    {label:"Cialdini's Six Principles of Persuasion (MindTools)", url:"https://www.mindtools.com/an30xh5/robert-cialdini-six-principles-of-persuasion/"},
+    {label:"Science of Persuasion — Cialdini's 6 principles, animated", url:"https://www.youtube.com/watch?v=cFdCzN7RYbw"},
+    {label:"Cialdini interview or talk", url:"https://www.youtube.com/watch?v=kv0sOX6Alrk"},
+    {label:"Cognitive biases", url:"https://youtu.be/wEwGBIr_RIw"}
+  ],
+  questions:[
+    {q:"Which of these is one of Cialdini's principles of influence?", opts:["Obscurity","Redundancy","Reciprocity","Encryption"], correct:2},
+    {q:"A message says 'most of your coworkers have already done this.' Which principle is it using?", opts:["Scarcity","Social proof","Authority","Liking"], correct:1},
+    {q:"Why does a fake urgent deadline work on people?", opts:["Pressure reduces careful thinking","It proves the sender is legitimate","It slows people down","It makes MFA stronger"], correct:0}
+  ]
+},
+{
+  id:"4", title:"Ethics and the Law",
+  goal:"Learn the rules before you learn the techniques. This is what separates a professional from someone breaking the law.",
+  resources:[
+    {label:"Pre-engagement (Penetration Testing Execution Standard)", url:"http://www.pentest-standard.org/index.php/Pre-engagement"},
+    {label:"Rules of engagement", url:"https://youtu.be/xuuj9hQYlcs"},
+    {label:"Deviant Ollam — I'll Let Myself In: Tactics of Physical Pen Testers (DEF CON)", url:"https://www.youtube.com/watch?v=rnmcRTnTNC8"},
+    {label:"Legal and ethical issues", url:"https://youtu.be/Iqr-Nr1iemk"}
+  ],
+  questions:[
+    {q:"Why do professionals need written authorization before testing?", opts:["It makes reports shorter","It separates legal testing from a crime","It speeds up OSINT","It is only for show"], correct:1},
+    {q:"In a security engagement, what does 'scope' mean?", opts:["The price of the engagement","The zoom level of a camera","Which systems, people, and methods are allowed to be tested","The length of the report"], correct:2},
+    {q:"What is the point of the 'get out of jail free' authorization letter?", opts:["It is carried during a physical test as proof you are authorized","It lets you test any building you like","It replaces the need for a contract","It is given to the target as a warning"], correct:0}
+  ]
+},
+{
+  id:"5", title:"Real-World Case Studies",
+  goal:"See how real attacks happened and how people were the weak point.",
+  resources:[
+    {label:"Social Engineering Eyed in High-Profile Casino Attacks (Finextra)", url:"https://www.finextra.com/blogposting/24927/social-engineering-eyed-in-high-profile-casino-attacks"},
+    {label:"CISA Advisory on Scattered Spider", url:"https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-320a"},
+    {label:"2020 Twitter hack", url:"https://youtu.be/GE5J_26Ut1Q"},
+    {label:"MGM and Caesars attacks", url:"https://youtu.be/S4Q7GENHuu4"},
+    {label:"RSA 2011 breach", url:"https://youtu.be/GrFtJFdDg_s"}
+  ],
+  questions:[
+    {q:"The CISA advisory in this step covers which group?", opts:["Heartbleed","Scattered Spider","The Morris worm","Y2K"], correct:1},
+    {q:"These case studies show attackers often got in by:", opts:["Manipulating people such as staff or help desks","Breaking encryption by brute force","Physically stealing servers","Crashing the internet"], correct:0},
+    {q:"Which of these is a case study listed in this step?", opts:["The Y2K bug","Heartbleed","The 2020 Twitter hack","The Morris worm"], correct:2}
+  ]
+},
+{
+  id:"6", title:"Defense, Mitigation and Training",
+  goal:"Learn how organizations protect themselves. Professional social engineers spend most of their time helping fix these problems.",
+  resources:[
+    {label:"Prevent and Mitigate Social Engineering Attacks (IANS)", url:"https://www.ians.com/blog/how-to-prevent-and-mitigate-social-engineering-attacks"},
+    {label:"How to Mitigate Social Engineering Attacks (Spikerz)", url:"https://www.spikerz.com/blog/how-to-mitigate-social-engineering-attacks"}
+  ],
+  questions:[
+    {q:"Which of these reduces social engineering risk?", opts:["Sharing passwords to save time","Removing email entirely","Skipping software updates","Staff training and verification procedures"], correct:3},
+    {q:"Why make reporting suspicious messages easy and blame-free?", opts:["So staff hide their mistakes","So fewer reports come in","So people report quickly and the organization can respond","So training is no longer needed"], correct:2},
+    {q:"Why does multi-factor authentication (MFA) help?", opts:["Passwords become unnecessary","A stolen password alone is not enough to log in","Emails become encrypted","Phones can no longer be used"], correct:1}
+  ]
+},
+{
+  id:"7", title:"OSINT Foundations",
+  goal:"Learn what OSINT is and why it comes before most attacks. This is the start of the recon phase.",
+  resources:[
+    {label:"OSINT: Corporate Recon (Hack The Box Academy) — $$$, optional", url:"https://academy.hackthebox.com/app/module/28"},
+    {label:"OSINT Introduction: what is open source intelligence", url:"https://www.youtube.com/watch?v=Sa5LbKqCmFI"},
+    {label:"OSINT preparation", url:"https://youtu.be/XAteMqmizaQ"}
+  ],
+  questions:[
+    {q:"What does OSINT stand for?", opts:["Online Security Intelligence Network","Open Source Intelligence","Open System Internet Tracking","Operational Security Inspection"], correct:1},
+    {q:"OSINT is gathered from:", opts:["Hacked private databases","Private messages","Publicly available information","Stolen passwords"], correct:2},
+    {q:"Why would a social engineer do OSINT before contacting a target?", opts:["To gather details that make the approach believable","To avoid needing any authorization","To delete the target's data","To speed up a software update"], correct:0}
+  ]
+},
+{
+  id:"8", title:"OSINT Techniques, Part 1: Emails, Usernames and Search",
+  goal:"Learn to pull information from emails, usernames and search engines.",
+  resources:[
+    {label:"Email OSINT, content analysis", url:"https://www.youtube.com/watch?v=DQPaesW0_Ls"},
+    {label:"Username analysis 1", url:"https://www.youtube.com/watch?v=TDYsCvcRI3g"},
+    {label:"Username analysis 2", url:"https://youtu.be/t1nw1uLF9L4"},
+    {label:"Google dorking 1", url:"https://youtu.be/_dcu_sou9Iw"},
+    {label:"Google dorking 2", url:"https://youtu.be/o3XmXbh6Sjg"}
+  ],
+  questions:[
+    {q:"What can an email or its content reveal?", opts:["Only the date","Details such as sender names, systems, and writing patterns","Nothing useful","The recipient's password"], correct:1},
+    {q:"Why is reusing the same username on many sites a risk?", opts:["It slows down logins","It causes more spam","It lets someone link your accounts across sites","It deletes old accounts"], correct:2},
+    {q:"What is Google dorking?", opts:["Using advanced search operators to find specific information","Hacking into Google's servers","A Google game","Buying search ads"], correct:0}
+  ]
+},
+{
+  id:"9", title:"OSINT Techniques, Part 2: Geolocation, Hidden Info, Social Media and Reporting",
+  goal:"Go deeper: find places in photos, uncover hidden details and write up what you found.",
+  resources:[
+    {label:"Geolocation 1", url:"https://www.youtube.com/watch?v=X7E6zinrkno"},
+    {label:"Geolocation 2", url:"https://youtu.be/roH2fQDSo-w"},
+    {label:"Geolocation 3", url:"https://youtu.be/RoqWbpZUOSo"},
+    {label:"Extracting information", url:"https://youtu.be/64OrnwmcUOg"},
+    {label:"Revealing hidden information", url:"https://youtu.be/ljiRh-nOP1Y"},
+    {label:"Social media OSINT video", url:"https://youtu.be/W0IC6MYkVi8"},
+    {label:"Social media OSINT playlist", url:"https://youtube.com/playlist?list=PLIhvC56v63IJ9SYBtdDsNnORfTNFCXR8_"},
+    {label:"Report writing", url:"https://youtu.be/9uh0b0DQWrg"}
+  ],
+  questions:[
+    {q:"What is geolocation in OSINT?", opts:["Working out where a photo was taken using visual clues","Deleting a photo's metadata","Tracking someone's phone without permission","Compressing images"], correct:0},
+    {q:"Which is a useful geolocation clue?", opts:["The photo's file name","Street signs, landmarks, and shadows","The photo's color filter","The number of likes"], correct:1},
+    {q:"Why does writing a clear report matter in OSINT?", opts:["It hides your sources","It makes the work longer","It records findings and sources so others can verify them","It replaces the need for research"], correct:2}
+  ]
+},
+{
+  id:"9.5", title:"Social Engineering a Website (Info Disclosure & Leaked Credentials)",
+  goal:"Learn how attackers use a website's own public-facing content against it: leftover secrets in page source, old blog posts, and other information a site leaks without meaning to. Only practice this on labs built for it or sites you own or are authorized to test.",
+  resources:[
+    {label:"OWASP Web Security Testing Guide: Information Gathering", url:"https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/"},
+    {label:"PortSwigger Web Security Academy: Information Disclosure", url:"https://portswigger.net/web-security/information-disclosure"},
+    {label:"View page source basics", url:"https://youtu.be/4Sante-ArwU"},
+    {label:"Google dorking for leaked credentials and files", url:"https://youtu.be/u_gOnwWEXiA"},
+    {label:"Privilege escalation through social engineering (tricking staff, not exploiting code)", url:"https://youtu.be/0pD8ygqbhOk"}
+  ],
+  questions:[
+    {q:"What is 'information disclosure'?", opts:["Encrypting a website's traffic","A website or server unintentionally exposing sensitive information","A type of firewall","A DDoS attack"], correct:1},
+    {q:"Where might leftover credentials accidentally end up?", opts:["In a CSS stylesheet only","In page source comments, config files, or old backup files","In the website's favicon","In the DNS TTL value"], correct:1},
+    {q:"Why would an attacker read a company's blog posts or GitHub repos before contacting them?", opts:["To find internal details that make a pretext more convincing","To subscribe to the newsletter","To find the company's stock price","To check server uptime"], correct:0}
+  ]
+},
+{
+  id:"10", title:"Practice OSINT and Longer Courses",
+  goal:"Build skill with exercises and deeper courses.",
+  resources:[
+    {label:"OSINT Dojo resources", url:"https://www.osintdojo.com/resources/"},
+    {label:"OSINT Dojo on YouTube", url:"https://www.youtube.com/@OSINTDojo/playlists"},
+    {label:"Alternative course", url:"https://youtu.be/GQHD-iLLGe8"},
+    {label:"Alternative OSINT course, recommended, 10+ hours", url:"https://youtube.com/playlist?list=PLOSJSv0hbPZBXT4kuRv_e8BP0TyOGc_W5"},
+    {label:"OSINT Curious", url:"https://osintcurio.us/"}
+  ],
+  questions:[
+    {q:"Which resource in this step is highly recommended and made many of the videos?", opts:["GeoGuessr","OSINT Dojo","Toastmasters","GoPhish"], correct:1},
+    {q:"About how long is the recommended alternative OSINT course?", opts:["10+ hours","10 minutes","1 hour","1 minute per lesson"], correct:0},
+    {q:"What is safe OSINT practice?", opts:["Researching strangers' accounts","Testing a company without permission","Digging into private people","Using exercises and challenges built for learning"], correct:3}
+  ]
+},
+{
+  id:"11", title:"Pretexting and Elicitation",
+  goal:"Learn the human-interaction skills that follow recon.",
+  resources:[
+    {label:"Elicitation (Social-Engineer Framework)", url:"https://www.social-engineer.org/framework/influencing-others/elicitation/"},
+    {label:"Hadnagy on elicitation", url:"https://youtu.be/2ZgUTX3VNQ4"},
+    {label:"Pretexting explained", url:"https://youtu.be/RsZHQk0Y57Q"},
+    {label:"Jenny Radcliffe talk", url:"https://youtu.be/qr1RCOjYoQA"}
+  ],
+  questions:[
+    {q:"What is a pretext?", opts:["A firewall rule","An invented scenario or identity used to start a conversation","A type of malware","A password list"], correct:1},
+    {q:"What is elicitation?", opts:["Drawing out information through natural conversation without asking directly","Forcing someone to answer","Scanning a network","Encrypting a message"], correct:0},
+    {q:"Who wrote Social Engineering: The Art of Human Hacking?", opts:["Kevin Mitnick","Robert Cialdini","Chris Hadnagy","Chris Voss"], correct:2}
+  ]
+},
+{
+  id:"12", title:"Communication Skills",
+  goal:"Strengthen the people skills that everything else depends on.",
+  resources:[
+    {label:"Toastmasters", url:"https://www.toastmasters.org/"},
+    {label:"Chris Voss, tactical empathy", url:"https://youtu.be/MjhDkNmtjy0"},
+    {label:"Active listening", url:"https://youtu.be/7wUCyjiyXdg"},
+    {label:"Building rapport", url:"https://youtu.be/5IydYv-ivOI"}
+  ],
+  questions:[
+    {q:"What is active listening?", opts:["Talking more than listening","Waiting for your turn to speak","Focusing fully on what the other person says and reflecting it back","Interrupting to clarify"], correct:2},
+    {q:"What is Chris Voss's approach called in this step?", opts:["Brute force","Tactical stalling","Shadowing","Tactical empathy"], correct:3},
+    {q:"What does Toastmasters help you practice?", opts:["Public speaking and communication","Cracking passwords","Network scanning","Email authentication"], correct:0}
+  ]
+},
+{
+  id:"13", title:"Technical Attack and Defense Mechanics",
+  goal:"Learn how phishing is simulated and how email and logins are protected.",
+  resources:[
+    {label:"GoPhish User Guide", url:"https://docs.getgophish.com/user-guide/"},
+    {label:"GoPhish setup", url:"https://youtu.be/KTWxIaSXcJA"},
+    {label:"SPF, DKIM and DMARC", url:"https://youtu.be/c9fLp5uIxp8"},
+    {label:"MFA fatigue and SIM swap", url:"https://youtu.be/RtdOs7WFZqc"}
+  ],
+  questions:[
+    {q:"What is GoPhish used for?", opts:["Cracking Wi-Fi passwords","Running authorized phishing simulations","Mapping photo locations","Writing OSINT reports"], correct:1},
+    {q:"What do SPF, DKIM, and DMARC help with?", opts:["Making emails load faster","Compressing attachments","Verifying an email really comes from the domain it claims","Blocking all advertising"], correct:2},
+    {q:"What is MFA fatigue?", opts:["Getting tired of changing passwords","A broken login page","A slow phone","Bombarding a user with approval prompts until they accept one"], correct:3}
+  ]
+},
+{
+  id:"14", title:"Security Frameworks",
+  goal:"Learn the shared language security professionals use.",
+  resources:[
+    {label:"MITRE ATT&CK: Phishing (T1566)", url:"https://attack.mitre.org/techniques/T1566/"},
+    {label:"Verizon Data Breach Investigations Report", url:"https://www.verizon.com/business/resources/reports/dbir/"},
+    {label:"OWASP Top 10:2025 (optional)", url:"https://top10.owasp.org/2025/"},
+    {label:"MITRE's ATT&CK Framework — intro", url:"https://www.youtube.com/watch?v=0BEf6s1iu5g"},
+    {label:"Initial access and phishing", url:"https://youtu.be/eJEBqn-KVXc"},
+    {label:"DBIR walkthrough", url:"https://youtu.be/yn_YZaxjbxs"}
+  ],
+  questions:[
+    {q:"What is MITRE ATT&CK?", opts:["A knowledge base of attacker tactics and techniques","A phishing tool","A password manager","A type of malware"], correct:0},
+    {q:"Which MITRE ATT&CK technique ID is listed for phishing?", opts:["T1059","T1566","T1021","T1003"], correct:1},
+    {q:"What is the Verizon DBIR?", opts:["A phishing simulator","A password cracking tool","An annual report analyzing real data breaches","An OSINT search engine"], correct:2}
+  ]
+},
+{
+  id:"15", title:"Physical Security and Breaching",
+  goal:"See how physical security can be tested. Only ever do this with written authorization.",
+  resources:[
+    {label:"Video 1", url:"https://youtu.be/YVqurfWzB-Q"},
+    {label:"Video 2", url:"https://youtu.be/YtT8q2mUM9c"},
+    {label:"Video 3", url:"https://youtu.be/VJ4FDOw9NcI"}
+  ],
+  questions:[
+    {q:"What is tailgating?", opts:["Driving too close to another car","Following an authorized person through a secure door","Copying a badge number from an email","Calling a front desk"], correct:1},
+    {q:"What should a professional always carry during an authorized physical test?", opts:["A fake ID","A map of the building","A signed authorization letter","A list of employee passwords"], correct:2},
+    {q:"When should physical testing be attempted?", opts:["Whenever it seems fun","Only on weekends","Only on small buildings","Only with written authorization"], correct:3}
+  ]
+},
+{
+  id:"16", title:"Competitions and Practice",
+  goal:"See skills used under strict rules, with no real harm.",
+  resources:[
+    {label:"Temple University Social Engineering", url:"https://sites.temple.edu/socialengineering/"},
+    {label:"Temple competition video 1", url:"https://www.youtube.com/watch?v=tb67HGyFBYk"},
+    {label:"Temple competition video 2", url:"https://www.youtube.com/watch?v=ZNugPWy5Hok"},
+    {label:"Temple competition video 3", url:"https://www.youtube.com/watch?v=MAB6pgmBf3k"}
+  ],
+  questions:[
+    {q:"What is a social engineering competition (SECTF)?", opts:["A social engineering capture-the-flag contest with strict rules","A password cracking race","A coding exam","A hardware repair contest"], correct:0},
+    {q:"Why do these competitions have strict rules?", opts:["To make them harder to win","So no real harm is done","To keep them secret","To avoid needing judges"], correct:1},
+    {q:"Which university's site is listed in this step?", opts:["Harvard","Stanford","Temple","Yale"], correct:2}
+  ]
+},
+{
+  id:"17", title:"Your Own OPSEC",
+  goal:"Protect yourself, now that you know how much can be found.",
+  resources:[
+    {label:"EFF Surveillance Self-Defense", url:"https://ssd.eff.org/"},
+    {label:"Reduce your digital footprint", url:"https://youtu.be/sGbixee041A"},
+    {label:"Michael Bazzell on privacy", url:"https://youtu.be/a4KUB6iuKOI"},
+    {label:"Data broker removal", url:"https://youtu.be/mDjjbjwmFd0"}
+  ],
+  questions:[
+    {q:"What is a digital footprint?", opts:["A fingerprint scanner","The trail of information about you online","A type of firewall","A phone case"], correct:1},
+    {q:"What are data brokers?", opts:["Companies that collect and sell personal information","Banks that protect your data","Email providers","Antivirus makers"], correct:0},
+    {q:"Which resource in this step helps you protect your privacy?", opts:["Hack The Box Academy","MITRE ATT&CK","Verizon DBIR","EFF Surveillance Self-Defense"], correct:3}
+  ]
+},
+{
+  id:"18", title:"Next Steps and Certifications",
+  goal:"Choose where to go from here.",
+  resources:[
+    {label:"TryHackMe — $, has a free tier", url:"https://tryhackme.com/"},
+    {label:"Cybersecurity career paths", url:"https://youtu.be/23jIaxkh0pI"},
+    {label:"Security+ overview", url:"https://youtu.be/V-Cqsbj3raU"},
+    {label:"SANS SEC567, Social Engineering for Penetration Testers — $$$", url:"https://youtu.be/7NGT8AzFe38"}
+  ],
+  questions:[
+    {q:"What does TryHackMe offer?", opts:["Only video lectures","Only books","Hands-on practice rooms, including social engineering and OSINT","Legal advice"], correct:2},
+    {q:"Which certification is mentioned in this step?", opts:["CompTIA Security+","Cisco CCNA","Microsoft Azure Fundamentals","Google Analytics"], correct:0},
+    {q:"What is SANS SEC567?", opts:["A free beginner video series","A social engineering course for penetration testers, marked very expensive","A phishing tool","A privacy guide"], correct:1}
+  ]
+}
+];
+
+/* Extra content per module: t = minutes, k = applied task, c = self-check items, sq = scenario question */
+const EXTRA={
+"1":{t:45,k:"In 3–4 sentences, describe a moment when you (or someone you know) were nudged into acting by trust, urgency or authority. Name the trigger.",c:["I named a specific trigger","I said what verifying would have looked like"],
+ sq:{q:"A stranger in a hi-vis vest says he’s here to “check the fire extinguishers” and follows you through a secure door. Why can this work?",opts:["Hi-vis vests unlock doors","People tend to treat a confident manner and a plausible role as legitimate","Buildings never have access control","Fire inspectors are legally exempt from security"],correct:1,why:"Social engineering exploits default trust in plausible roles and confident behavior, not a technical flaw."}},
+"2":{t:60,k:"Write a two-sentence warning for a family member about one attack type from this module, including the single action that defeats it.",c:["I named the channel (email, text or phone)","I gave one clear action"],
+ sq:{q:"A text says: “Your parcel is held. Pay £1.50 at this link today.” What is it, and what is the best first response?",opts:["Smishing: don’t click; check the carrier’s official app or site","Vishing: call the number back","Tailgating: report it to building security","Phishing by email: reply STOP"],correct:0,why:"Text-message phishing is smishing. Verify through a channel you already trust, never through the message itself."}},
+"3":{t:60,k:"Pick three of Cialdini’s principles. For each, write one defensive-training example: a message that uses it and the cue a person should notice.",c:["Three different principles","Each example includes the warning cue"],min:45,
+ sq:{q:"An email from your “CFO’s assistant” says: “Wire this today. The CEO is boarding a flight and unreachable. Keep it confidential.” Which levers are in play?",opts:["Authority, urgency and isolation","Reciprocity and liking only","Scarcity and social proof only","None, it’s routine"],correct:0,why:"Authority (the CEO), urgency (today) and secrecy (no checking) are the classic business email compromise pattern. The fix is out-of-band verification."}},
+"4":{t:60,k:"Draft a five-line rules-of-engagement outline for an imaginary client: scope, out of scope, emergency contact, testing hours and stop condition.",c:["All five items are present","Out-of-scope is specific, not vague"],
+ sq:{q:"A friend wants to “test” their employer’s help desk with a convincing fake call. There’s no paperwork, but they say it’s harmless. What’s the right call?",opts:["Fine as long as no data is taken","Decline until written authorization defines scope and rules of engagement","Fine if done outside work hours","Fine with a burner number"],correct:1,why:"Written authorization is what separates a legal test from a crime, however good the intent."}},
+"5":{t:75,k:"Choose one case study. Write the entry point, the human decision that mattered most, and one control that would have broken the chain.",c:["I identified a specific human decision","My control is realistic for that organization"],min:40,
+ sq:{q:"In the help-desk-driven breaches covered here, which control would most directly have blunted the attack?",opts:["Stronger Wi-Fi encryption","Strict identity verification before resetting credentials or MFA","Faster antivirus signatures","Blocking USB ports"],correct:1,why:"The attackers talked their way into credential and MFA resets. Verification procedures close that door."}},
+"6":{t:40,k:"Write a short verification script (bullet notes are fine) for a help-desk agent handling a caller who asks for an MFA reset.",c:["Verification does not rely on information an attacker could research","It says what to do when the caller can’t be verified"],min:40,
+ sq:{q:"An employee reports they clicked a phishing link ten minutes ago. Which organizational response works best?",opts:["Discipline them publicly as a deterrent","Thank them, contain quickly (reset credentials, review sessions) and learn from it","Wait and see if anything happens","Ask them to keep it quiet"],correct:1,why:"Blame-free, fast reporting is the strongest early-warning system an organization has."}},
+"7":{t:45,k:"In your own words, explain the difference between passive and active recon and why that line matters ethically and legally.",c:["I gave an example of each","I mentioned authorization"],
+ sq:{q:"Which of these is passive OSINT?",opts:["Reading a company’s public job postings and press releases","Sending probing emails to its staff","Port scanning its servers","Calling reception with an invented story"],correct:0,why:"Passive recon uses public sources without interacting with the target."}},
+"8":{t:75,k:"Using only your own accounts or a fictional persona, list what an email address and a username could reveal, then three ways to reduce that exposure.",c:["I used only my own or fictional data","I listed three concrete mitigations"],
+ sq:{q:"During an authorized, in-scope exercise you find the handle “jdoe_runs42”. What’s the most defensible next step?",opts:["Check whether it appears on other public sites and document every source","Try common passwords on its login","Message the person posing as a friend","Report the account for deletion"],correct:0,why:"Stay passive, stay in scope and record sources so findings can be verified."}},
+"9":{t:120,k:"Take a photo you own. List its geolocation clues (signs, shadows, terrain, architecture), then state your conclusion with a confidence level.",c:["At least three distinct clues","I gave a confidence level and why"],min:40,
+ sq:{q:"A photo shows a tram, a pharmacy sign in a particular script and long shadows. What’s the best geolocation approach?",opts:["Combine clues and corroborate with maps and imagery","Go with your first guess","Rely on the filename","Use the like count"],correct:0,why:"Strong geolocation stacks independent clues and checks them against external references."}},
+"9.5":{t:60,k:"On a site you own or a purpose-built lab, list three possible information disclosures you’d report and how you’d fix each. Never use sites you aren’t authorized to test.",c:["Each finding has a fix","I stated the authorization for my target"],min:40,
+ sq:{q:"While testing your own site you find a staging password in an old page-source comment. What’s the right sequence?",opts:["Try it on other services to see if it works","Record it, report it, rotate the credential and remove the comment","Post it publicly as a warning","Ignore it, since comments are invisible"],correct:1,why:"Treat any exposed secret as compromised: rotate first, then clean up and document."}},
+"10":{t:240,k:"Complete one OSINT Dojo (or similar) challenge. Record the question, your sources, your method and your final answer.",c:["Every source is listed","Another person could reproduce my steps"],
+ sq:{q:"Why keep a log with screenshots and links for every practice exercise?",opts:["So findings are reproducible and verifiable","To hide where information came from","Because the law requires it for all searches","There is no real reason"],correct:0,why:"Reproducibility is what turns a pile of searches into evidence, and it becomes your portfolio."}},
+"11":{t:75,k:"Write a pretext for a fictional engagement where the client has signed off. Include the believable story, what you would ask for, your ethical limits and your abort condition.",c:["Limits and abort condition are explicit","It targets a fictional or consenting organization"],min:50,
+ sq:{q:"Which approach is elicitation rather than interrogation?",opts:["Asking open, friendly questions that let people volunteer details","Demanding specific data and repeating the demand","Threatening consequences if they refuse","Asking only yes/no questions"],correct:0,why:"Elicitation draws information out through natural conversation. Use it only inside an authorized engagement."}},
+"12":{t:60,k:"In a short written reflection, explain one concept from this course as if to a nervous new colleague, then note one thing you’d tighten.",c:["Plain language, no jargon","I noted something to improve"],
+ sq:{q:"A colleague says, “I can’t believe they changed the schedule again.” Which reply shows active listening?",opts:["“Same thing happened to me last week…”","“Sounds like the changes make planning hard for you. Is that right?”","“You should just deal with it.”","“Anyway, about my question…”"],correct:1,why:"Reflecting back what you heard, and checking it, shows understanding and invites more detail."}},
+"13":{t:90,k:"For a lab or consenting staff, outline a simulated phishing exercise: goals, approvals, success metrics and the training that follows.",c:["Approval and consent are covered","Metrics measure learning, not blame"],min:45,
+ sq:{q:"An email passes SPF, but its visible From domain doesn’t align with the SPF or DKIM domains. What should DMARC enforcement do?",opts:["Deliver it","Apply the domain’s policy (quarantine or reject)","Ignore it","Forward it to all staff"],correct:1,why:"DMARC requires SPF or DKIM to align with the visible From domain. Failing alignment triggers the published policy."}},
+"14":{t:60,k:"Map one case study from module 5 to MITRE ATT&CK tactics and techniques. List at least three.",c:["Each technique has an ID","I explained why it fits"],
+ sq:{q:"Why do teams reference frameworks like ATT&CK in reports?",opts:["Tools, teams and reports then describe behavior in a shared language","To make reports longer","To replace evidence","Because the law requires it"],correct:0,why:"A shared vocabulary makes findings comparable, searchable and actionable across teams."}},
+"15":{t:60,k:"Write the checklist for a physical-test authorization letter: what it must state and who must be reachable during the test.",c:["Scope and dates are included","A reachable client contact is included"],
+ sq:{q:"During an authorized physical test, a guard stops you and starts asking questions. What should you do?",opts:["Run","Stay calm and present the authorization letter and your engagement contact","Invent a new story","Hand over your tools and say nothing"],correct:1,why:"The letter exists for exactly this moment. Honesty at that point protects you and the client."}},
+"16":{t:60,k:"Pick one competition rule that protects targets and explain why it matters.",c:["The rule is specific","I explained the harm it prevents"],
+ sq:{q:"What mainly separates a social engineering competition from a real attack?",opts:["Same targets, no rules","Consenting or fictional targets, strict rules, scoring and bans on sensitive requests","Real bank accounts","No judges"],correct:1,why:"Rules and consent are what make the exercise training instead of harm."}},
+"17":{t:45,k:"Audit your own footprint: list five places your information appears and your removal plan for each.",c:["Five places listed","Each has a concrete next step"],
+ sq:{q:"Which action best reduces your exposure to data-broker-driven pretexting?",opts:["Request broker opt-outs and use separate email aliases per service","Post more public details","Reuse one username everywhere","Disable passwords"],correct:0,why:"Less linkable, less available data means a thinner pretext for anyone targeting you."}},
+"18":{t:30,k:"Write your 90-day plan: two labs, one certification step, and one portfolio piece.",c:["Each item has a date or week","The plan fits my available hours"],
+ sq:{q:"Which choice best describes a sustainable path after this course?",opts:["Stack hands-on labs, work toward a recognized certification and keep a public-safe portfolio","Practice on strangers","Skip ethics","Only watch videos"],correct:0,why:"Hands-on practice plus recognized credentials and documented work is what employers and clients look for."}},
+"cap":{t:120,min:120,k:"Write a mock engagement plan for a fictional company: authorization and scope, a summary of (fictional) OSINT findings, the high-level approaches you would propose, your ethical limits, and defensive recommendations.",c:["Scope and authorization come first","Ethical limits and an abort condition are stated","Defensive recommendations are specific"]}
+};
+COURSE.push({id:"cap",title:"Capstone: Mock Engagement Plan",goal:"Bring it all together. Plan a fully fictional, ethical engagement from authorization to defensive recommendations.",resources:[],questions:[]});
+const LESSONS={
+"1":{s:[["The human is the target","Social engineering is manipulating people into giving up access, information or money by exploiting trust, habit and emotion instead of software flaws. It is often the cheapest way in, because fixing a person takes training, not a patch."],["The basic shape","Most attacks follow a lifecycle: research the target, build a believable story, exploit the trust to get an action, then exit. A defender can interrupt any one of those stages."],["Why it matters","Recent Verizon breach reports consistently find a human element in well over half of breaches. You study the attacker’s methods to defend against them and to test organizations with permission."]],k:["Social engineering targets people, not just machines","Attacks follow a predictable lifecycle you can learn to spot","The goal here is defense and authorized testing"]},
+"2":{s:[["Digital channels","Phishing is fraudulent email sent in bulk. Spear phishing targets one person using researched details, and whaling targets executives. Smishing uses text messages, vishing uses phone calls, and business email compromise impersonates a trusted person to redirect payments."],["In person and other","Pretexting invents a scenario to extract information. Baiting leaves something tempting, like a USB drive or a free offer. Tailgating follows someone through a secured door. Quid pro quo offers help in exchange for access."]],k:["Naming the channel helps you pick the right defense","Real attacks often combine several types","Verifying through a second channel beats trying to spot tells"]},
+"3":{s:[["Cialdini’s six principles","Reciprocity: we repay favors. Commitment and consistency: we honor small earlier yeses. Social proof: we copy others. Authority: we defer to apparent experts. Liking: we help people we like. Scarcity: we want what is running out. Unity is sometimes added as a seventh."],["Pressure and bias","Attackers add urgency and fear to push people into fast, automatic thinking, and cognitive biases do the rest. The counter is a deliberate pause: slow down, then verify through a trusted channel."]],k:["Learn the six levers so you recognize them in messages","Urgency plus authority plus secrecy is a classic red-flag trio","A pause and a verification step break the spell"]},
+"4":{s:[["Authorization is everything","The same action is a job or a crime depending on written permission. A proper engagement has a signed contract, a defined scope, rules of engagement (allowed techniques, targets and hours), emergency contacts and a stop condition."],["Do no harm","Test the organization, not people’s dignity. Avoid personal accounts, family, health and finances, handle data minimally, and report findings so they get fixed rather than used to shame anyone. Laws differ by country, so get legal advice before you test."]],k:["No written authorization means no test","Scope and rules of engagement protect everyone","Report to improve security, never to embarrass"]},
+"5":{s:[["Phone and help-desk attacks","In the 2020 Twitter incident, attackers phoned employees posing as IT support, collected credentials and took over high-profile accounts. In the 2023 casino attacks, intruders reportedly impersonated staff to get help desks to reset access (see CISA advisory AA23-320a)."],["Phishing as a foothold","The 2011 RSA breach reportedly began with phishing emails carrying a malicious spreadsheet to a small group of employees. One opened file gave attackers a foothold that led to data theft."]],k:["Help desks and identity resets are prime targets","One click or call can start a long chain","Verification, least privilege and monitoring break the chain"]},
+"6":{s:[["Three layers","Technical controls include email filtering, phishing-resistant MFA such as passkeys, and least privilege. Process controls include callback verification, dual approval for payments and strict identity checks at the help desk. People controls are realistic training and an easy reporting channel."],["Culture","Reward fast reporting and measure reports, not just clicks. If people fear punishment they hide mistakes, and hidden mistakes give attackers more time."]],k:["Layer technical, process and people defenses","Verification procedures beat vigilance alone","A no-blame reporting culture is an early-warning system"]},
+"7":{s:[["What OSINT is","Open-source intelligence is gathering and analyzing lawfully public information: websites, social media, public records, job posts, images and DNS data. It is passive when you only look at existing public material, and active when you interact with the target, which needs authorization."],["A simple method","Define your question, collect from several sources, cross-check, document everything, then analyze and report. Notes and source links are what make findings credible."]],k:["OSINT uses public information only","Passive is observation; active needs permission","Document sources as you go"]},
+"8":{s:[["Emails and usernames","Companies often follow patterns like first.last@domain, and spotting the format helps map staff. People reuse usernames across sites, so one handle can link accounts. Always verify a match, because similar names do not mean the same person."],["Search operators","Google dorking uses operators like site:, filetype: and intitle: with quotes to narrow results, for example a company’s public PDFs. Use it to find what is accidentally exposed on your own or authorized targets."]],k:["Email formats and reused handles reveal a lot","Search operators make searching precise","Verify before you link two identities"]},
+"9":{s:[["Geolocation and images","Combine clues: signage language, road markings, architecture, vegetation, shadows and landmarks, then confirm with maps and street or satellite imagery. Photos may also carry EXIF metadata such as device, time and sometimes GPS, though many platforms strip it."],["Social media and reporting","Public posts can reveal routines, employers, colleagues and travel. A good OSINT report states the question, sources, method, findings, confidence and limits, and leaves out unnecessary personal data."]],k:["Stack independent clues and verify them","Metadata and posts leak more than people expect","Reports state sources and confidence"]},
+"9.5":{s:[["What leaks","Common leaks include comments in page source, exposed backup or version-control files, verbose error messages, default credentials, and credentials posted in public repositories. Viewing source on your own site is a simple, legal place to start."],["The human angle","Staff leak access too, through shared passwords or help-desk shortcuts. Treat any discovered credential as compromised: report it and rotate it. Test only systems you own or have written permission to test."]],k:["Small disclosures add up to real access","Exposed secrets must be rotated, not just hidden","Only test what you are authorized to test"]},
+"10":{s:[["Build the habit","Skill comes from repetition. Work through challenges designed for practice, keep a log of questions, sources and methods, then compare your approach to published write-ups."],["Stay ethical","Practice on challenge material and organizations you are authorized to assess. Do not trace private individuals who never opted in, however easy it looks."]],k:["Practice on purpose-built challenges","A clear log makes your work reproducible","Never turn practice into surveillance of real people"]},
+"11":{s:[["Pretexting","A pretext is a believable identity and scenario that gets someone to share information or act. The best are simple, close to the truth and match what the target expects. In authorized tests they must stay in scope and never involve impersonating law enforcement or causing distress."],["Elicitation","Elicitation draws information out through natural conversation: showing interest, asking open questions and letting silence work. As a defender, you can politely decline and redirect any time a question feels off."]],k:["Good pretexts are simple and believable","Elicitation steers conversation without demanding answers","Defenders can decline and verify"]},
+"12":{s:[["Rapport and listening","Rapport grows from genuine curiosity, matching tone and active listening: paraphrase what you heard, label emotions and ask open questions. Chris Voss calls this tactical empathy."],["Clarity under pressure","Speak plainly, slowly and with purpose, and practice in low-stakes settings like Toastmasters. These skills also make you a better report presenter and awareness trainer."]],k:["Listening builds more trust than talking","Label emotions and ask open questions","Clear communication helps defenders too"]},
+"13":{s:[["Email authentication","SPF lists the servers allowed to send for a domain. DKIM signs messages cryptographically. DMARC ties both to the visible From domain and tells receivers what to do with failures. Together they cut spoofing, but lookalike domains still get through."],["Simulation and account takeover","Tools like GoPhish run authorized phishing simulations for training. MFA fatigue floods a user with push approvals hoping one is accepted, and SIM swapping hijacks a phone number. Phishing-resistant MFA, number matching and carrier PINs reduce both."]],k:["SPF, DKIM and DMARC work together","Simulations are for training with consent","Phishing-resistant MFA is the strongest fix"]},
+"14":{s:[["ATT&CK","MITRE ATT&CK catalogs adversary tactics and techniques with IDs, and phishing is T1566. A shared vocabulary lets teams compare incidents and map their defenses."],["Breach data","Verizon’s DBIR analyzes breach data each year and keeps highlighting the human element, stolen credentials and phishing. OWASP’s Top 10 covers web application risks and complements both."]],k:["ATT&CK gives teams a common language","DBIR shows what actually causes breaches","Use frameworks to structure reports and defenses"]},
+"15":{s:[["How physical tests work","Physical tests check whether people and controls stop an unauthorized visitor: tailgating, badge cloning, lock bypass and pretexts at reception. Success often comes from social cues, not tools."],["Safety and defense","Always carry an authorization letter with client contacts, know your stop condition and never put anyone at risk. Defenses include badge discipline, a challenge-and-report culture, visitor management and secured doors."]],k:["Physical tests are authorized tests of people and process","The authorization letter is your safety net","Culture matters as much as locks"]},
+"16":{s:[["Social engineering CTFs","Competitions let participants contact consenting or fictional targets for points within strict rules, usually banning sensitive requests like passwords or financial data. They train OSINT, pretexting and ethics together under time pressure."],["Preparing","Research the target profile, craft a pretext, rehearse your call flow and learn the rules first. Afterward, review what worked and what crossed a line."]],k:["Competitions have consent and rules built in","They combine OSINT, pretexting and ethics","Always review your performance afterward"]},
+"17":{s:[["Shrink your footprint","Search yourself, close or lock down old accounts, tighten social-media privacy, use separate emails or aliases per service and a password manager. Less linkable data means weaker pretexts against you."],["Data brokers","Brokers sell personal data that fuels pretexting. Opt-out requests or removal services reduce it, but must be repeated because data reappears."]],k:["You are also a target","Aliases and separate accounts limit linkage","Re-check data brokers regularly"]},
+"18":{s:[["Build skill","Hands-on platforms such as TryHackMe plus steady practice beat passive watching. Document projects as you go, keeping private details out."],["Credentials and roles","Security+ is a common entry-level baseline. Related roles include SOC analyst, security awareness specialist and red team or penetration tester. Advanced courses such as SANS SEC567 are costly, so earn the fundamentals first."]],k:["Pair labs with a recognized credential","Keep a sanitized portfolio","Ethics and communication set you apart"]},
+"cap":{s:[["The full workflow","An ethical engagement runs: authorization, scope and rules, OSINT, approach design, execution within limits, reporting, then defensive recommendations. The last step is the point of the whole exercise."]],k:["Authorization first, always","Findings should lead to specific fixes","Use only fictional or consenting targets here"]}
+};
+const LX={
+"1":["Priya in accounts gets a call from “the bank’s fraud team”. They already know her name and the last digits of her card, taken from an old data breach. Nothing was hacked: the caller simply sounded informed, and informed sounds trustworthy.","Believing only gullible people fall for this. Attacks are tuned to a person’s mood, workload and role, and anyone can be caught on a bad day."],
+"2":["A “delivery” text creates a deadline, a link opens a fake login page, and the typed password goes to the attacker. That one chain uses smishing, phishing and credential theft together.","Checking only the sender’s display name. Names are trivial to fake, so check the actual domain and verify through another channel."],
+"3":["“Our CEO needs this today. Don’t tell anyone.” That stacks authority, urgency and isolation. Calling the CEO on a number you already have removes all three levers with one step.","Thinking that knowing the principles makes you immune. You still need a procedure to fall back on when you’re tired or rushed."],
+"4":["A signed scope allows phone tests of the help desk on weekdays, bans personal accounts and sets a stop word. Mid-test the client calls the stop word, so the tester ends the call, documents everything and debriefs.","Assuming one manager’s verbal yes is enough. Get written authorization from someone with the power to grant it."],
+"5":["Draw the chain for any case: research, contact, believable request, access gained, impact. Then mark where one control, such as a callback, MFA or an alert, would have cut it.","Blaming the person who was fooled. These cases show process failures: the process let one call grant access."],
+"6":["A finance team adds a rule: any change of bank details needs a callback to a number already on file plus a second approver. Fraud attempts now stall at the callback.","Training once a year and calling it done. Short, frequent, realistic practice with an easy report button works better."],
+"7":["From a careers page you learn a company’s VPN product, ticketing tool and office address. No contact was needed, yet each detail would make a pretext more convincing. That is why defenders review what they publish.","Treating public as harmless. Small facts combine into a profile."],
+"8":["Two staff emails on a site share the pattern first initial plus surname. The same username on two sites shows matching hobbies and city, which raises but does not prove a match.","Confirming an identity from one weak signal. Look for several independent matches."],
+"9":["A photo shows a blue tram, a sign in Cyrillic script and a hilltop cathedral. Those narrow the city, then street imagery pins the spot. Record each step and your confidence.","Skipping confidence levels. A reported location should say how sure you are and why."],
+"9.5":["A page comment reads “TODO remove test login: admin / Summer2024”. On your own site you would report it, rotate that password everywhere it was reused and add a deployment check for secrets in comments.","Deleting the comment and stopping there. The secret was exposed, so rotate it too."],
+"10":["A good log entry: “Question: who runs this domain? Sources: WHOIS, archived page, job post. Method: cross-check registrant and address. Answer and confidence.”","Collecting without a question. With no clear question you drown in data."],
+"11":["Defender’s view: a caller says they’re “from the vendor, doing a quick survey”. The safe reply is “I’ll call the vendor back on the number in our records.” It costs nothing and defeats any pretext.","Overcomplicating the story. Simple pretexts fail less often, and simple defenses beat them."],
+"12":["“It sounds like the new schedule is stressing you out. Is that right?” Naming the feeling invites the person to keep talking and feel understood.","Interrupting to share your own story. It turns a listening moment into a competition."],
+"13":["A spoofed message passes SPF for the attacker’s own domain but displays yours in From. DMARC alignment fails and the reject policy blocks it, which is why DMARC matters beyond SPF alone.","Assuming any MFA is enough. Push-only approval can be fatigued, so prefer FIDO2 passkeys."],
+"14":["A report line: “Initial Access, Phishing (T1566): spearphishing link, user clicked, credentials entered.” Beside it goes one recommended control.","Treating frameworks as checklists. They describe behavior but do not replace judgment about your organization."],
+"15":["A tester with a signed letter enters through an unlocked loading dock and photographs a password note at an unattended desk. The report recommends door alarms, a challenge culture and a password manager.","Collecting more than needed. Prove the point with minimal evidence and never touch personal belongings."],
+"16":["In a competition round you research a fictional company, then call within a time limit to collect allowed “flags”. Points reward ethical technique as well as results.","Chasing points over rules. A violation usually costs more than a missed flag."],
+"17":["Searching your own name finds an old forum account with your birthday and city. Closing it and opting out of two data brokers removes the easiest pretext material.","Doing a one-time cleanup. Data reappears, so schedule a quarterly check."],
+"18":["A 90-day plan: weeks 1 to 4 hands-on labs, weeks 5 to 8 certification study, weeks 9 to 12 a portfolio write-up. Small dated goals beat vague ambition.","Collecting certificates without practice. Employers weigh demonstrated work."],
+"cap":["Outline your report in this order: scope, method, findings, risk, recommendations. Make each recommendation specific, owned and testable.","Writing recommendations like “improve awareness”. Name the control, who owns it and how you’ll check it."]
+};
+const sortA=(title,intro,o,it)=>({t:"sort",title,intro,o,i:it.map(x=>({p:x[0],c:x[1],w:x[2]}))});
+const seqA=(title,intro,it)=>({t:"sort",seq:1,title,intro,i:it.map(x=>({p:x[0],o:x[1],c:x[2],w:x[3]}))});
+const flagA=(title,intro,m)=>({t:"flags",title,intro,m});
+const ACTS={
+"1":[sortA("Is it social engineering?","Decide for each situation.",["Yes","No"],[["Someone follows you through a badge-controlled door",0,"Tailgating relies on politeness, not a technical flaw."],["A software bug exposes a database",1,"That is a purely technical flaw with no person manipulated."],["A caller poses as IT to get your password",0,"Impersonating a trusted role to obtain a credential is the core pattern."],["A server is brute-forced with no human contact",1,"No person was manipulated, so this is a technical attack."]])],
+"2":[flagA("Spot the red flags","Click every suspicious phrase in this email, then check. Some phrases are normal, so choose carefully.","From: IT Support <helpdesk@{+corp-support-desk.co|a lookalike domain, not your company’s}>\nSent: {-Tuesday, 9:14 AM|an ordinary timestamp}\nSubject: {+URGENT: account suspended in 2 hours|manufactured urgency}\n\n{+Dear user|a generic greeting; the sender doesn’t know you}, we detected unusual sign-in activity. {+Verify now at http://login-secure-update.net/verify|a link to an unrelated domain}.\n{+Do not contact the help desk, as it will delay recovery.|isolation: it blocks the check that would expose the scam}\n\n{-Thank you, IT Service Desk|a normal sign-off, not a signal by itself}"),
+ sortA("Name the attack","Match each scenario to its attack type.",["Phishing","Smishing","Vishing","Tailgating","Baiting"],[["A text says your parcel is held and links to a fee page",1,"Text-message phishing is smishing."],["A caller claims to be your bank’s fraud team",2,"Voice-call phishing is vishing."],["A stranger slips in behind you at the staff door",3,"Following someone through a secured entrance is tailgating."],["Branded USB drives are left in a car park",4,"Tempting physical media is baiting."],["A mass email mimics a shipping notice",0,"A bulk fraudulent email is phishing."]])],
+"3":[sortA("Which lever is it?","Match each message to its main principle.",["Reciprocity","Commitment","Social proof","Authority","Liking","Scarcity"],[["“Only 3 seats left. The offer ends tonight.”",5,"Running out creates pressure to act."],["“Our CEO personally asked me to get this to you.”",3,"Borrowed rank triggers deference."],["“Most of your team already completed this survey.”",2,"People copy what others appear to do."],["“Here’s a free gift. Could you answer a few questions?”",0,"A favor creates a feeling of obligation."],["“You agreed to the short form, so please finish the rest.”",1,"A small earlier yes makes a bigger one feel consistent."],["“We went to the same college, so I’m happy to help.”",4,"Shared identity builds liking and trust."]])],
+"4":[sortA("Go or no-go","Decide whether each action fits a signed scope covering help-desk phone tests.",["Go","No-go"],[["Calling the in-scope help desk during agreed hours",0,"It matches the signed scope."],["Calling an employee’s spouse to learn their schedule",1,"Family members are out of scope and the action causes harm."],["Testing a vendor’s systems the client doesn’t control",1,"The vendor must give its own authorization."],["Ending the test the moment the client says stop",0,"Respecting the stop condition is part of the rules."],["Continuing after the stop word because you’re close",1,"Ignoring the stop condition breaks the engagement terms."]])],
+"6":[seqA("Run the help desk","You are the agent. Pick the best response at each step.",[["A caller says they’re the CFO, locked out before a board meeting, and wants an MFA reset now.",["Reset it, since executives get priority","Run the normal identity check and offer a callback to the number on file","Ask for their employee ID and birthday"],1,"Pressure and rank are exactly what the procedure exists for. A callback to a known number is out-of-band, while ID and birthday can be researched."],["They refuse the callback and get angry.",["Make an exception to keep them calm","Escalate to a manager and log the call","Hang up and say nothing"],1,"Escalating and logging protects you and creates a record."],["Later you realize you hinted at how your system works. What now?",["Report it to security right away","Stay quiet","Wait a week to see"],0,"Fast, honest reporting lets defenders respond before it matters."]])],
+"7":[sortA("Passive or active?","Sort each recon action.",["Passive","Active"],[["Reading the company’s About page",0,"Public material, with no interaction."],["Emailing an employee with a question",1,"Contacting the target is active."],["Browsing the company’s public professional-network page",0,"Looking at public posts is passive."],["Scanning the company’s network ports",1,"Probing its systems is active and needs authorization."],["Looking up its domain registration record",0,"Public registry data is passive."]])],
+"9.5":[sortA("Real exposure or normal?","Sort what you find while reviewing a site you own.",["Real exposure","Normal"],[["A comment in page source containing a staging password",0,"A secret in public markup is compromised."],["A copyright notice in the footer",1,"Expected content."],["A public backup.zip at the site root",0,"Backups can contain code and credentials."],["A contact email on the contact page",1,"Intentionally published."],["A directory listing that shows a .env file",0,"Configuration files often hold secrets."]])],
+"11":[seqA("At the conference","You’re the defender. Pick the best response at each step.",[["A friendly stranger asks which remote-access tools your team uses.",["List them, it’s just small talk","Politely deflect and change the subject","Ask who they work for, then answer"],1,"Tooling details help an attacker. Deflecting costs nothing, and a badge or story can be faked."],["They keep pressing and mention a mutual contact who “said you’d help”.",["Verify the mutual contact independently, then decide","Name-drop back to seem friendly","Give a general answer to end it"],0,"Check claimed connections through a channel you already trust."]])],
+"13":[sortA("SPF, DKIM or DMARC?","Match each description to the right control.",["SPF","DKIM","DMARC"],[["Lists which servers may send mail for a domain",0,"That is exactly what an SPF record does."],["Adds a cryptographic signature to the message",1,"DKIM signs outgoing mail."],["Tells receivers to reject mail that fails alignment",2,"DMARC sets the policy."],["Helps confirm the message wasn’t altered in transit",1,"The signature breaks if content changes."],["Publishes a policy and a reporting address",2,"DMARC includes reporting."]]),
+ seqA("Approval at 2 a.m.","You are the user. Pick the best response at each step.",[["Your phone shows a login approval at 2 a.m. You didn’t log in.",["Approve so it stops","Deny it and report to security","Ignore it"],1,"An unrequested prompt means someone has your password."],["It keeps happening every few minutes.",["Approve one, in case it’s a glitch","Phone security, reset your password and review recent sign-ins","Turn off the phone and ignore it"],1,"Escalate and reset. Ignoring leaves the password compromised."]])],
+"15":[seqA("Authorized walk-through","You hold a signed letter. Pick the best response at each step.",[["A door is propped open and your scope includes entry attempts.",["Walk in, nothing to lose","Confirm the door is in scope before entering","Force the lock instead"],1,"Stay inside the written scope, even when it’s easy to exceed it."],["An employee asks to see your badge.",["Show the authorization letter and client contact","Invent a story","Walk away quickly"],0,"Honesty at this point protects you and the client."],["A guard calls the police.",["Stay calm, cooperate and give the client contact","Argue and leave","Hide the letter"],0,"The letter and a reachable contact resolve the situation."]])],
+"17":[sortA("Reduces or increases?","Does each habit reduce or increase your exposure to pretexting?",["Reduces","Increases"],[["Using email aliases per service",0,"Aliases make accounts harder to link."],["Posting your commute publicly",1,"Routines make pretexts easier."],["Opting out of data brokers",0,"It removes ready-made profile data."],["Reusing one username everywhere",1,"It lets anyone connect your accounts."],["Locking down old accounts",0,"Old accounts leak details for years."]])]
+};
+ACTS["5"]=[sortA("Break the chain","Match each failure to the control that would have stopped it.",["Identity verification","Phishing-resistant MFA","Monitoring and alerts","Least privilege"],[["A caller talks the help desk into resetting a password",0,"Verification stops a reset based on a good story."],["Staff typed credentials into a fake login page",1,"Passkeys only work on the real site."],["One stolen account could reach every internal tool",3,"Least privilege limits the blast radius."],["Mass account changes went unnoticed for hours",2,"Alerting shortens attacker dwell time."]])];
+ACTS["8"]=[sortA("Strong evidence or weak signal?","Does each finding really link two identities?",["Strong evidence","Weak signal"],[["The same common username on two sites",1,"Many people share handles."],["Same photo, bio and city on two accounts",0,"Several independent matches add up."],["A name that looks similar to the target’s",1,"Similarity proves nothing alone."],["A reverse image search tying the avatar to both accounts",0,"A unique image match is strong."]])];
+ACTS["9"]=[sortA("Strong clue or weak clue?","Rate each clue for geolocating a photo.",["Strong clue","Weak clue"],[["A distinctive landmark in the background",0,"It can be matched to maps."],["The photo’s file name",1,"Easily renamed or meaningless."],["Road markings and signage language",0,"Narrows the country or region."],["The number of likes",1,"Says nothing about place."],["Shadow direction and length",0,"Gives time and hemisphere hints."]])];
+ACTS["10"]=[seqA("Run an investigation","Pick the best move at each step.",[["You get a challenge: where was this photo taken? First step?",["Start guessing locations","Write the question and list what you can see","Search random sites"],1,"A clear question and observations guide everything else."],["One source gives a promising match.",["Stop, you have the answer","Cross-check with a second independent source","Delete the notes"],1,"One source can be wrong or planted."],["Time to wrap up.",["Record sources, method and confidence","Submit only the answer","Skip the log"],0,"The log makes your work reproducible."]])];
+ACTS["12"]=[sortA("Listening or not?","Sort each behavior.",["Active listening","Poor listening"],[["“So you felt overlooked when the plan changed?”",0,"Reflecting back shows understanding."],["Checking your phone while they talk",1,"It signals low interest."],["Finishing their sentences",1,"It takes over their story."],["Pausing, then asking an open follow-up",0,"It invites more detail."],["“That’s nothing, wait till you hear mine.”",1,"It competes instead of listening."]])];
+ACTS["14"]=[flagA("Read the email header","Click every sign that this message is not from the bank it claims to be. “Acme Bank” is fictional.","Received: from {+mail.random-host.ru|an unrelated server sending as a bank}\nFrom: {-Acme Bank Alerts|a display name proves nothing alone} <alerts@{+acme-bank-secure.com|a lookalike of the real domain}>\nReply-To: {+support@gmail-help.net|replies go to someone else}\nAuthentication-Results: spf={+fail|the sender isn’t authorized for the domain}; dkim={+none|no signature}; dmarc={+fail|alignment failed}\nMessage-ID: {-<8a1f2@mail.random-host.ru>|an ordinary-looking ID}\nDate: {-Mon, 12 Oct 2026 03:12:09 +0000|a normal date format}"),
+ sortA("Match the technique","Match each behavior to its ATT&CK technique.",["T1566 Phishing","T1078 Valid Accounts","T1621 MFA Request Generation"],[["An email link leads to a fake login page",0,"That is phishing."],["An attacker logs in with a stolen password",1,"Using legitimate credentials is Valid Accounts."],["An attacker spams push prompts until one is approved",2,"That is MFA Request Generation."]])];
+ACTS["16"]=[seqA("Play by the rules","Pick the best move at each step.",[["A target blurts out a real bank card number during a practice round.",["Write it down","Steer away and don’t record it","Ask for the expiry too"],1,"Sensitive data is off-limits, even when offered."],["A rival suggests calling a real company that hasn’t agreed.",["Do it, it’s only practice","Refuse: only consenting or fictional targets","Do it quietly"],1,"Consent is the rule that makes it training."]])];
+ACTS["18"]=[sortA("Actionable or vague?","Which plan items would you keep?",["Actionable","Vague"],[["Finish two TryHackMe rooms by Friday",0,"Specific and dated."],["Get really good at security",1,"No measure or deadline."],["Book the Security+ exam for week 10",0,"Concrete and scheduled."],["Learn everything about hacking",1,"Unbounded."],["Publish one sanitized write-up a month",0,"A measurable cadence."]])];
+(ACTS["13"]=ACTS["13"]||[]).push(flagA("Spot the smishing text","Click every suspicious part of this text message, then check.","From: +44 7700 900123\nParcelHub: {-Thank you for shopping with us|polite filler, not a signal alone}. Your package could not be delivered. {+Pay a £1.99 fee within 1 hour|urgency plus a small payment request}: {+hxxp://parcelhub-redelivery.top/pay|an unrelated domain with an odd ending (defanged here)}\n{+Sent from a personal mobile number|businesses usually use short codes or registered names}\n{-Ref: 48215|an ordinary reference number}"));
+const rq=(p,o,c,w)=>({p,o,c,w});
+const REV={t:"sort",title:"Modules 1 to 10",intro:"Twelve mixed questions from the first half of the course. Answers give instant feedback, and you get a first-try score at the end.",i:[
+rq("What do nearly all social engineering attacks have in common?",["They exploit a technical vulnerability","They manipulate a person’s trust or emotions","They need physical access","They require malware"],1,"The target is a person’s judgment."),
+rq("A caller from “your bank” asks you to read out a code just texted to you. What do you do?",["Read it, they sent it","Hang up and call the number on your card","Ask them to resend it","Read half of it"],1,"Verify through a channel you control."),
+rq("Which is the strongest business email compromise cue?",["A newsletter","A new bank-detail change marked urgent and confidential","A meeting invite","An out-of-office reply"],1,"Money, urgency and secrecy together."),
+rq("“95% of your colleagues already signed up” uses which principle?",["Scarcity","Authority","Social proof","Reciprocity"],2,"We copy what others do."),
+rq("What makes a security test legal rather than criminal?",["Good intentions","Written authorization with a defined scope","A confident attitude","Keeping data private"],1,"Permission and scope are everything."),
+rq("What do rules of engagement define?",["The tester’s fee","Techniques, targets, hours and stop conditions","The report’s font","Marketing plans"],1,"They set the limits of the test."),
+rq("How did the 2020 Twitter attackers first get in?",["Brute-forcing servers","Phoning employees posing as IT support","A malicious update","Stealing laptops"],1,"Phone-based social engineering."),
+rq("Which is a feature of a healthy security culture?",["Punishing everyone who clicks","Rewarding fast, no-blame reporting","Hiding incidents","One annual training"],1,"Fast reporting shortens incidents."),
+rq("What should you do first in an OSINT investigation?",["Collect everything","Define the question to answer","Contact the target","Buy a tool"],1,"A question guides collection."),
+rq("You find the same username on two sites. What does that prove?",["They’re definitely the same person","Nothing by itself; look for more matches","The sites are linked","The account is hacked"],1,"Handles are often shared."),
+rq("Which operator limits a search to one website?",["filetype:","intitle:","site:","cache:"],2,"site:example.com restricts results."),
+rq("You find a live password on a site you’re authorized to test.",["Share it publicly","Report it and recommend rotating it","Try it elsewhere","Ignore it"],1,"Treat exposed secrets as compromised.")]};
+ACTS.review=[REV];
+const GLOSS=[
+["Social engineering","Manipulating people into giving up access, data or money by exploiting trust and emotion.","1"],["Pretext","A believable invented identity and scenario used to get information or an action.","11"],["Phishing","Fraudulent messages, usually email, that trick people into acting or sharing details.","2"],["Spear phishing","Phishing aimed at one person using researched details.","2"],["Whaling","Spear phishing aimed at senior executives.","2"],["Smishing","Phishing delivered by text message.","2"],["Vishing","Phishing delivered by voice call.","2"],["Business email compromise","Impersonating a trusted person by email to redirect payments or data.","2"],["Baiting","Using something tempting, like a free USB drive, to lure a victim.","2"],["Tailgating","Following an authorized person through a secured door.","2"],["Quid pro quo","Offering help or a benefit in exchange for access or information.","2"],["Lookalike domain","A domain that closely resembles a real one.","2"],["Reciprocity","We feel obliged to repay favors.","3"],["Commitment and consistency","We act in line with what we previously agreed to.","3"],["Social proof","We copy what others appear to be doing.","3"],["Authority bias","We defer to perceived experts and rank.","3"],["Liking","We say yes to people we like or resemble.","3"],["Scarcity","We value what seems limited or running out.","3"],["Rules of engagement","The agreed limits of a test: techniques, targets, hours and stop conditions.","4"],["Scope","The systems, people and activities a test is authorized to cover.","4"],["Out-of-band verification","Confirming a request through a separate, trusted channel.","6"],["Least privilege","Giving accounts only the access they need.","6"],["OSINT","Gathering and analyzing lawfully public information.","7"],["Passive recon","Collecting information without interacting with the target.","7"],["Active recon","Interacting with the target to gather information; needs authorization.","7"],["Google dorking","Using search operators to find specific or exposed information.","8"],["EXIF metadata","Hidden data in photos such as device, time and sometimes location.","9"],["Geolocation","Working out where a photo or video was taken from visible clues.","9"],["Information disclosure","Unintentionally exposed data such as comments, backups or error messages.","9.5"],["Elicitation","Drawing out information through natural conversation.","11"],["Active listening","Paraphrasing and checking what you heard to show understanding.","12"],["Tactical empathy","Naming another person’s feelings to build trust and influence.","12"],["SPF","An email record listing servers allowed to send mail for a domain.","13"],["DKIM","A cryptographic signature that helps show a message wasn’t altered.","13"],["DMARC","A policy tying SPF and DKIM to the visible From domain, with reporting.","13"],["MFA fatigue","Flooding a user with approval prompts until one is accepted.","13"],["SIM swapping","Hijacking a phone number by tricking or bribing a carrier.","13"],["Passkey (FIDO2)","Phishing-resistant sign-in using cryptographic keys tied to a site.","13"],["MITRE ATT&CK","A public catalog of attacker tactics and techniques.","14"],["DBIR","Verizon’s annual Data Breach Investigations Report.","14"],["Authorization letter","A signed document proving a tester is permitted to perform the test.","15"],["SECTF","A social engineering capture-the-flag competition with consent and rules.","16"],["OPSEC","Operational security: protecting information that could be used against you.","17"],["Data broker","A company that collects and sells personal information.","17"],["Red team","A group that simulates attackers, with permission, to test defenses.","18"]].sort((a,b)=>a[0].localeCompare(b[0]));
+let DECK=[...GLOSS],MODE="step";const G={q:"",fc:false,i:0,flip:false};
+function renderReview(){$("view").innerHTML=`<h1>Mid-course review</h1><p class="goal">Mix what you’ve learned so far. Best taken after the OSINT modules, and worth retaking later.</p><div class="sec"><div class="act" data-a="review:0">${actBody(REV,"review:0")}</div></div>`}
+function renderGloss(){
+ const q=G.q.toLowerCase(),m=x=>!q||(x[0]+" "+x[1]).toLowerCase().includes(q),num=id=>COURSE.findIndex(z=>z.id===id)+1;
+ let h=`<h1>Glossary</h1><p class="goal">Every key term in the course. Search the list, or switch to flashcards.</p><div class="sec"><div class="gtools"><input id="gq" type="search" placeholder="Search terms" value="${esc(G.q)}"><button class="btn ghost" data-g="fc">${G.fc?"Show list":"Flashcards"}</button></div>`;
+ const L=(G.fc?DECK:GLOSS).filter(m),n=L.length;
+ if(!n)h+=`<p class="lock">No matching terms.</p>`;
+ else if(G.fc){G.i=(G.i+n)%n;const c=L[G.i];h+=`<div class="fcard" data-g="flip"><small>${G.i+1} of ${n}</small><div>${esc(G.flip?c[1]:c[0])}</div><small>${G.flip?"Module "+num(c[2]):"Tap to reveal"}</small></div><div class="nav"><button class="btn ghost" data-g="prev">Previous</button><button class="btn ghost" data-g="shuf">Shuffle</button><button class="btn ghost" data-g="next">Next</button></div>`}
+ else h+=`<dl class="gl">`+L.map(c=>`<dt>${esc(c[0])}</dt><dd>${esc(c[1])} <span class="tag">Module ${num(c[2])}</span></dd>`).join("")+`</dl>`;
+ $("view").innerHTML=h+`</div>`}
+const DROP={"5":[2],"10":[0,1],"12":[2],"16":[2],"17":[2],"18":[1,2]};
+COURSE.forEach(s=>{delete s.flag;if(DROP[s.id])s.questions=s.questions.filter((_,i)=>!DROP[s.id].includes(i));const x=EXTRA[s.id];if(x&&x.sq)s.questions.push(x.sq)});
+const PH=[{n:"Foundations",ids:["1","2","3","4"]},{n:"Case studies and defense",ids:["5","6"]},{n:"Reconnaissance (OSINT)",ids:["7","8","9","9.5","10"]},{n:"Human skills",ids:["11","12"]},{n:"Technical and physical",ids:["13","14","15"]},{n:"Practice and career",ids:["16","17","18","cap"]}];
+
+const $=id=>document.getElementById(id),KEY="se_course_v2";
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const isOpt=r=>/optional|\$\$\$|10\+ hours/i.test(r.label);
+const kind=u=>/playlist/.test(u)?"Playlist":/youtu/.test(u)?"Video":"Read";
+const yt=u=>{let m=u.match(/[?&]list=([\w-]+)/);if(/playlist/.test(u)&&m)return"https://www.youtube.com/embed/videoseries?list="+m[1];m=u.match(/youtu\.be\/([\w-]{11})/)||u.match(/[?&]v=([\w-]{11})/);return m?"https://www.youtube.com/embed/"+m[1]+"?rel=0":null};
+const words=t=>(t.trim().match(/\S+/g)||[]).length;
+const fmt=m=>m>=60?(m/60).toFixed(m%60?1:0)+" h":m+" min";
+const minW=s=>EXTRA[s.id].min||25;
+function hash(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function order(s,qi){let a=hash(s.id+":"+qi);const r=()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296};
+ const o=[...s.questions[qi].opts.keys()];for(let i=o.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[o[i],o[j]]=[o[j],o[i]]}return o}
+
+let ST={},META={cur:COURSE[0].id,seen:false},OK=true;
+const blank=s=>({res:s.resources.map(()=>false),sel:s.questions.map(()=>null),checked:false,pass:!s.questions.length,note:"",chk:EXTRA[s.id].c.map(()=>false),done:false});
+function hydrate(sv){
+ COURSE.forEach(s=>{const b=blank(s),o=sv[s.id];
+  if(o){if(o.res&&o.res.length===b.res.length)b.res=o.res;
+   if(o.sel&&o.sel.length===b.sel.length){b.sel=o.sel;b.checked=!!o.checked;b.pass=!!o.pass||b.pass}
+   if(typeof o.note==="string")b.note=o.note;if(o.chk&&o.chk.length===b.chk.length)b.chk=o.chk;b.done=!!o.done&&b.pass}
+  ST[s.id]=b});
+ if(sv._m){META=Object.assign(META,sv._m);if(!COURSE.some(s=>s.id===META.cur))META.cur=COURSE[0].id}}
+const dump=()=>{const o={_m:META};COURSE.forEach(s=>o[s.id]=ST[s.id]);return JSON.stringify(o)};
+function persist(){try{localStorage.setItem(KEY,dump());OK=true}catch(e){OK=false}$("warn").hidden=OK}
+try{hydrate(JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){OK=false;hydrate({})}
+
+function reqFrac(s){const st=ST[s.id],r=s.resources.map((x,i)=>[x,i]).filter(([x])=>!isOpt(x));return r.length?r.filter(([,i])=>st.res[i]).length/r.length:1}
+const frac=s=>(reqFrac(s)+(ST[s.id].pass?1:0)+(ST[s.id].done?1:0))/3;
+const isDone=s=>reqFrac(s)===1&&ST[s.id].pass&&ST[s.id].done;
+
+function renderTop(){
+ const f=COURSE.reduce((a,s)=>a+frac(s),0)/COURSE.length,n=COURSE.filter(isDone).length;
+ $("fill").style.width=(f*100).toFixed(1)+"%";$("pct").textContent=Math.round(f*100)+"%";$("cnt").textContent=n+" / "+COURSE.length;
+ $("left").textContent=fmt(COURSE.filter(s=>!isDone(s)).reduce((a,s)=>a+EXTRA[s.id].t,0));
+ if(n===COURSE.length&&!META.seen){$("sum").textContent="You finished all "+n+" modules.";$("overlay").classList.add("show")}}
+
+function renderRail(){
+ let h=`<button class="tool ${MODE==="review"?"cur":""}" data-mode="review">Mid-course review quiz</button><button class="tool ${MODE==="gloss"?"cur":""}" data-mode="gloss">Glossary and flashcards</button>`;
+ PH.forEach(p=>{const ss=p.ids.map(id=>COURSE.find(s=>s.id===id)),d=ss.filter(isDone).length;
+  h+=`<div class="ph">${p.n}<span>${d}/${ss.length}</span></div><ul class="nodes">`;
+  ss.forEach(s=>{const i=COURSE.indexOf(s),f=frac(s);
+   h+=`<li><button class="node ${isDone(s)?"done":f>0?"part":""} ${s.id===META.cur&&MODE==="step"?"cur":""}" data-go="${s.id}"><b>${i+1}</b>${esc(s.title)}</button></li>`});
+  h+="</ul>"});
+ $("rail").innerHTML=h}
+
+function renderView(){
+ if(MODE==='review')return renderReview();if(MODE==='gloss')return renderGloss();
+ const i=COURSE.findIndex(s=>s.id===META.cur),s=COURSE[i],st=ST[s.id],x=EXTRA[s.id],ph=PH.find(p=>p.ids.includes(s.id));
+ let h=`<div class="chips"><span class="chip">${ph.n}</span><span class="chip">about ${fmt(x.t)}</span><span class="chip ${isDone(s)?"ok":""}">${isDone(s)?"Complete":"In progress"}</span></div>
+ <h1>${i+1}. ${esc(s.title)}</h1><p class="goal">${esc(s.goal)}</p>`;
+ const L=LESSONS[s.id];
+ if(L){h+=`<div class="sec lesson"><h2>Lesson</h2>`+L.s.map(x=>`<h3>${esc(x[0])}</h3><p>${esc(x[1])}</p>`).join("")+(LX[s.id]?`<h3>Worked example</h3><p>${esc(LX[s.id][0])}</p><h3>Common mistake</h3><p>${esc(LX[s.id][1])}</p>`:"")+`<div class="key"><b>Key takeaways</b><ul>`+L.k.map(x=>`<li>${esc(x)}</li>`).join("")+`</ul></div></div>`}
+ const vids=[],links=[];
+ s.resources.forEach((r,k)=>{const e=yt(r.url);(e?vids:links).push([r,k,e])});
+ const tick=k=>`<button class="ck ${st.res[k]?"on":""}" data-tog="${k}" aria-label="Mark done">${st.res[k]?"✓":""}</button>`;
+ if(vids.length){h+=`<div class="sec"><h2>Watch</h2><p class="sub">Videos play right here. If one shows an error when this file is opened straight from your computer, use its “Open on YouTube” link.</p><div class="vids">`;
+  vids.forEach(([r,k,e])=>{h+=`<div class="vid"><div class="vf" data-play="${k}" data-src="${e}"><button aria-label="Play ${esc(r.label)}">▶</button></div><div class="vm">${tick(k)}<span>${esc(r.label)}${isOpt(r)?" (optional)":""}</span><a href="${encodeURI(r.url)}" target="_blank" rel="noopener" data-open="${k}">Open on YouTube</a></div></div>`});
+  h+=`</div></div>`}
+ if(links.length){h+=`<div class="sec"><h2>Go deeper</h2><p class="sub">Supplemental reading and courses. Tick each one once you’ve looked at it.</p><ul class="res">`;
+  links.forEach(([r,k])=>{h+=`<li>${tick(k)}<a href="${encodeURI(r.url)}" target="_blank" rel="noopener" data-open="${k}">${esc(r.label)}</a><span class="tag">${kind(r.url)}</span>${isOpt(r)?'<span class="tag">Optional</span>':""}</li>`});
+  h+=`</ul></div>`}
+ h+=actHTML(s);
+ if(s.questions.length){
+  h+=`<div class="sec"><h2>Check your understanding</h2><p class="sub">Answer every question correctly to unlock the applied task.</p>`;
+  s.questions.forEach((q,qi)=>{h+=`<div class="q"><p><b>${qi+1}.</b> ${esc(q.q)}</p>`;
+   order(s,qi).forEach(oi=>{const on=st.sel[qi]===oi;let c="opt";
+    if(st.checked&&on)c+=oi===q.correct?" good":" bad";else if(st.pass&&oi===q.correct)c+=" good";
+    h+=`<label class="${c}"><input type="radio" name="q${qi}" data-q="${qi}" data-o="${oi}" ${on?"checked":""} ${st.pass?"disabled":""}><span>${esc(q.opts[oi])}</span></label>`});
+   if(st.checked&&st.sel[qi]===q.correct&&q.why)h+=`<p class="why">${esc(q.why)}</p>`;
+   h+=`</div>`});
+  const wrong=st.checked&&!st.pass;
+  h+=st.pass?`<span class="fb good">All correct. Applied task unlocked.</span>`:
+   `<button class="btn" id="chk" ${st.sel.every(v=>v!==null)?"":"disabled"} data-act="${wrong?"retry":"check"}">${wrong?"Retry wrong answers":"Check answers"}</button>${wrong?'<span class="fb bad">Some answers are off. Revisit the resources, then retry.</span>':""}`;
+  h+=`</div>`}
+ h+=`<div class="sec"><h2>Apply it</h2>`;
+ if(!st.pass)h+=`<p class="lock">Pass the questions above to unlock this task.</p>`;
+ else{h+=`<p class="sub">${esc(x.k)}</p><textarea id="note" placeholder="Write your answer here. It’s saved in this browser.">${esc(st.note)}</textarea>
+  <div class="wc" id="wc"></div>`;
+  x.c.forEach((c,k)=>{h+=`<label class="cl"><input type="checkbox" data-ck="${k}" ${st.chk[k]?"checked":""}>${esc(c)}</label>`});
+  h+=`<p style="margin-top:14px"><button class="btn" id="fin" data-act="finish"></button></p>`}
+ h+=`</div><div class="nav"><button class="btn ghost" data-go="${i>0?COURSE[i-1].id:""}" ${i?"":"disabled"}>Previous</button>
+  <button class="btn ghost" data-go="${i<COURSE.length-1?COURSE[i+1].id:""}" ${i<COURSE.length-1?"":"disabled"}>Next module</button></div>`;
+ $("view").innerHTML=h;syncTask()}
+
+function syncTask(){
+ const s=COURSE.find(z=>z.id===META.cur),st=ST[s.id],b=$("fin");if(!b)return;
+ const w=words(st.note),m=minW(s),ready=w>=m&&st.chk.every(Boolean);
+ $("wc").textContent=w+" / "+m+" words minimum";b.disabled=!ready&&!st.done;
+ b.textContent=st.done?"Completed ✓":"Mark task complete";b.disabled=st.done||!ready}
+function renderAll(){renderTop();renderRail();renderView()}
+function go(id){if(!id)return;MODE='step';META.cur=id;persist();renderAll();window.scrollTo(0,0)}
+
+const AS={};
+function actHTML(s){const A=ACTS[s.id];if(!A)return"";
+ return `<div class="sec"><h2>Practice</h2><p class="sub">Hands-on activities with instant feedback. They’re optional, but this is where the learning sticks.</p>`+A.map((a,i)=>`<div class="act" data-a="${s.id}:${i}">${actBody(a,s.id+":"+i)}</div>`).join("")+`</div>`}
+function actBody(a,key){
+ const S=AS[key]||(AS[key]=a.t==="flags"?{p:[],c:false}:{ok:[],bad:[]}),dn=META.act&&META.act[key];
+ let h=`<h3>${esc(a.title)}${dn?'<span class="chip ok">Done</span>':""}</h3><p class="sub">${esc(a.intro)}</p>`;
+ if(a.t==="flags"){
+  const re=/\{([+-])([^|}]+)\|?([^}]*)\}/g,info=[],ex=[];let m,last=0,out="";
+  while(m=re.exec(a.m)){const k=info.length,ok=m[1]==="+",on=S.p.includes(k);info.push(ok);out+=esc(a.m.slice(last,m.index));
+   let c="hot";if(S.c){c+=ok?(on?" good":" miss"):(on?" bad":"");if(m[3])ex.push(`<li><b>${esc(m[2])}</b>: ${esc(m[3])}${ok?"":" (fine)"}</li>`)}else if(on)c+=" on";
+   out+=`<span class="${c}" data-f="${k}">${esc(m[2])}</span>`;last=re.lastIndex}
+  out+=esc(a.m.slice(last));
+  const pass=S.c&&info.every((ok,k)=>ok===S.p.includes(k));
+  h+=`<div class="msg">${out}</div>`;
+  if(!S.c)h+=`<button class="btn" data-ac="check" ${S.p.length?"":"disabled"}>Check my answers</button>`;
+  else h+=`<div class="why ${pass?"":"bad"}"><b>${pass?"All correct.":"Not quite: green is right, amber was missed, red was a normal phrase."}</b><ul>${ex.join("")}</ul></div>`+(pass?"":`<p><button class="btn ghost" data-ac="again">Try again</button></p>`)}
+ else{
+  const n=a.i.length,show=a.seq?Math.min(n,S.ok.filter(Boolean).length+1):n;
+  a.i.slice(0,show).forEach((it,j)=>{const op=it.o||a.o;
+   h+=`<div class="it"><p>${esc(it.p)}</p><div class="pills">`+op.map((x,k)=>`<button class="pill ${S.ok[j]&&it.c===k?"good":""} ${!S.ok[j]&&S.bad[j]===k?"bad":""}" data-s="${j}:${k}" ${S.ok[j]?"disabled":""}>${esc(x)}</button>`).join("")+`</div>`+
+   (S.ok[j]&&it.w?`<p class="why">${esc(it.w)}</p>`:(S.bad[j]!==undefined&&!S.ok[j]?`<p class="why bad">Not quite. Try another answer.</p>`:""))+`</div>`});
+  if(S.ok.filter(Boolean).length===n)h+=`<p class="fb good" style="margin:14px 0 0;display:flex;gap:12px;align-items:center">Complete. First-try score: ${a.i.filter((_,j)=>S.bad[j]===undefined).length} of ${n}. <button class="btn ghost" data-ac="again">Retry</button></p>`}
+ return h}
+function actClick(t){
+ const box=t.closest(".act"),key=box.dataset.a,sp=key.split(":"),a=ACTS[sp[0]][+sp[1]],S=AS[key],done=()=>{META.act=META.act||{};META.act[key]=true;persist()};
+ if(t.dataset.s!==undefined){const q=t.dataset.s.split(":").map(Number);if(a.i[q[0]].c===q[1])S.ok[q[0]]=true;else S.bad[q[0]]=q[1];if(a.i.every((_,j)=>S.ok[j]))done()}
+ else if(t.dataset.f!==undefined){if(S.c)return;const k=+t.dataset.f,p=S.p.indexOf(k);if(p<0)S.p.push(k);else S.p.splice(p,1)}
+ else if(t.dataset.ac==="check"){S.c=true;const info=[...a.m.matchAll(/\{([+-])/g)].map(x=>x[1]==="+");if(info.every((ok,k)=>ok===S.p.includes(k)))done()}
+ else if(t.dataset.ac==="again")AS[key]=null;
+ box.innerHTML=actBody(a,key)}
+function mark(k,v){const st=ST[META.cur];st.res[k]=v;persist();document.querySelectorAll('[data-tog="'+k+'"]').forEach(b=>{b.classList.toggle("on",v);b.textContent=v?"✓":""});renderTop();renderRail()}
+document.addEventListener("click",e=>{
+ const t=e.target.closest("[data-go],[data-tog],[data-open],[data-act],[data-play],[data-s],[data-f],[data-ac],[data-g],[data-mode]");if(!t)return;
+ const s=COURSE.find(z=>z.id===META.cur),st=ST[s.id];
+ if(t.dataset.mode!==undefined){MODE=t.dataset.mode;renderAll();window.scrollTo(0,0);return}
+ if(t.dataset.g!==undefined){const g=t.dataset.g;if(g==="fc"){G.fc=!G.fc;G.i=0;G.flip=false}else if(g==="flip")G.flip=!G.flip;else if(g==="next"){G.i++;G.flip=false}else if(g==="prev"){G.i--;G.flip=false}else if(g==="shuf"){for(let i=DECK.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[DECK[i],DECK[j]]=[DECK[j],DECK[i]]}G.i=0;G.flip=false}renderGloss();return}
+ if(t.dataset.s!==undefined||t.dataset.f!==undefined||t.dataset.ac!==undefined){actClick(t);return}
+ if(t.dataset.go!==undefined){go(t.dataset.go);return}
+ if(t.dataset.tog!==undefined){mark(+t.dataset.tog,!st.res[+t.dataset.tog]);return}
+ if(t.dataset.open!==undefined){mark(+t.dataset.open,true);return}
+ if(t.dataset.play!==undefined){const k=+t.dataset.play;t.innerHTML='<iframe src="'+t.dataset.src+'&autoplay=1" title="'+esc(s.resources[k].label)+'" allow="autoplay;encrypted-media;picture-in-picture;fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';t.removeAttribute("data-play");t.style.cursor="default";mark(k,true);return}
+ if(t.dataset.act==="check"){st.checked=true;st.pass=st.sel.every((v,qi)=>v===s.questions[qi].correct);persist();renderAll()}
+ else if(t.dataset.act==="retry"){st.sel=st.sel.map((v,qi)=>v===s.questions[qi].correct?v:null);st.checked=false;persist();renderView()}
+ else if(t.dataset.act==="finish"){st.done=true;persist();renderAll()}});
+document.addEventListener("change",e=>{
+ const s=COURSE.find(z=>z.id===META.cur),st=ST[s.id],t=e.target;
+ if(t.dataset.q!==undefined){st.sel[+t.dataset.q]=+t.dataset.o;if(st.checked&&!st.pass)st.checked=false;persist();const c=$("chk");if(c){c.disabled=!st.sel.every(v=>v!==null);c.dataset.act="check";c.textContent="Check answers"}}
+ else if(t.dataset.ck!==undefined){st.chk[+t.dataset.ck]=t.checked;persist();syncTask()}});
+document.addEventListener("input",e=>{if(e.target.id==="note"){const st=ST[META.cur];st.note=e.target.value;st.done=false;persist();syncTask();renderTop();renderRail()}});
+
+document.addEventListener("input",e=>{if(e.target.id==="gq"){G.q=e.target.value;G.i=0;G.flip=false;renderGloss();const el=$("gq");el.focus();el.setSelectionRange(el.value.length,el.value.length)}});
+$("exp").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([dump()],{type:"application/json"}));a.download="se-course-progress.json";a.click();URL.revokeObjectURL(a.href)};
+$("imp").onclick=()=>$("file").click();
+$("file").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{try{hydrate(JSON.parse(r.result));persist();renderAll()}catch(x){alert("That file isn’t valid course progress.")}};r.readAsText(f);e.target.value=""};
+$("rst").onclick=()=>{if(confirm("Erase all progress and notes? Export first if you want a backup.")){ST={};META={cur:COURSE[0].id,seen:false};hydrate({});persist();renderAll()}};
+$("close").onclick=()=>{META.seen=true;persist();$("overlay").classList.remove("show")};
+const hdr=document.querySelector(".top"),setTH=()=>document.documentElement.style.setProperty("--th",hdr.offsetHeight+"px");setTH();addEventListener("resize",setTH);
+renderAll();$("warn").hidden=OK;
+</script>
+</body>
+</html>
